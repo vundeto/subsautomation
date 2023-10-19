@@ -52,9 +52,6 @@ public class FileChooser extends JFrame implements ActionListener {
             try {
                 App.execute(path);
             } catch (Exception e) {
-                if (e instanceof NotDirectoryException) System.out.println("Not a directory");
-                if (e instanceof NoZipException) System.out.println("No Zip or no Srt file in Zip");
-                if (e instanceof IOException) System.out.println("");
             } finally {
                 dispose();
             }

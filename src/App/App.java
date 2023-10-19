@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Set;
+import java.net.URISyntaxException;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -89,9 +87,13 @@ public class App {
         return path.contains("mkv") || path.contains("mp4") || path.contains("avi") || path.contains("wav");
     }
 
-    public static void execute(String dir) throws IOException, NotDirectoryException, NoZipException {
+    public static void execute(String dir) throws IOException, NotDirectoryException, NoZipException, URISyntaxException {
         File location = new File(dir);
         if (!location.isDirectory()) throw new NotDirectoryException("");
+        String name = location.getName().replaceAll(".", " ");
+        List<String> list = SubSearch.findSubLinks(location.getName());
+        //getting first result
+        //SubSearch.downloadFile();
         File file = findZip(location);
         unzipFile(file, dir);
         renameSrFile(location);
@@ -117,6 +119,8 @@ public class App {
             zip.close();
         }
         return str.contains("srt");
+    }
+    public static void main(String[] args) {
     }
 
 }
