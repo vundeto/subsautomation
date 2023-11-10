@@ -1,19 +1,23 @@
 package gui;
 
-import App.App;
-import App.NoZipException;
+import App.SubSearch;
+import App.UnzipAndRename;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.NotDirectoryException;
+import java.util.List;
+
 
 public class FileChooser extends JFrame implements ActionListener {
 
     private JTextField filePath;
     private String selectedFilePath;
+
+
+    private String title;
 
     public FileChooser() {
         super("Unzip & Rename");
@@ -32,6 +36,7 @@ public class FileChooser extends JFrame implements ActionListener {
         panel.add(confirmButton);
         add(panel);
 
+
         setVisible(true);
     }
 
@@ -49,26 +54,83 @@ public class FileChooser extends JFrame implements ActionListener {
             }
         } else if (evt.getActionCommand().equals("Confirm")) {
             String path = getSelectedFilePath().replaceAll("\"", "/");
+            File f = new File(path);
+            String str = SubSearch.parseTitle(f.getName()).trim();
             try {
-                App.execute(path);
+                System.out.println(SubSearch.getURL(str));
             } catch (Exception e) {
-            } finally {
-                dispose();
+
+            }
+            List<String> l = SubSearch.findSubLinks(titleCheck(str));
+            if (l.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No subtitles found for following title: " + title,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            try {
+                SubSearch.downloadFile("https://subsunacs.net" + SubSearch.mostAccurateEntry(l, title), path, title);
+                UnzipAndRename.apply(path);
+                JOptionPane.showMessageDialog(null,"Executed successfully", "Result"
+                        , JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+
+    }
+
+    public String titleCheck(String text) {
+        JDialog jd = new JDialog(this, "", Dialog.ModalityType.APPLICATION_MODAL);
+        jd.setSize(200, 200);
+        jd.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Is the following title correct?"));
+
+        jd.add(panel);
+        JButton confirmButton = new JButton("Confirm");
+        JTextField field = new JTextField(15);
+        field.setEditable(true);
+        field.setText(text);
+        confirmButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setTitle(field.getText());
+                System.out.println(field.getText());
+                jd.dispose();
+            }
+        });
+        confirmButton.setEnabled(true);
+
+        panel.add(field);
+        panel.add(confirmButton);
+        jd.setVisible(true);
+        jd.setLocationRelativeTo(this);
+
+        return field.getText();
+
     }
 
     public String getSelectedFilePath() {
         return selectedFilePath;
     }
 
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
     public static void main(String[] args) {
-        FileChooser fileChooser = new FileChooser();
-        //fileChooser.pack();
-        fileChooser.setVisible(true);
-        fileChooser.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        fileChooser.setLocationRelativeTo(null);
-        fileChooser.setResizable(false);
+        FileChooser f = new FileChooser();
+        f.setVisible(true);
+
     }
 
 }
+

@@ -1,6 +1,6 @@
 package App;
 
-
+import org.apache.commons.text.similarity.JaroWinklerDistance;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -22,9 +22,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 
 public class SubSearch {
 
@@ -33,7 +36,7 @@ public class SubSearch {
                 .setScheme("https")
                 .setHost("subsunacs.net")
                 .setPath("search.php")
-                .addParameter("m", name)
+                .addParameter("m", "")
                 .addParameter("l", "0")
                 .addParameter("y", "o")
                 .addParameter("action", "+++%D2%FA%F0%F1%E8+++")
@@ -45,13 +48,14 @@ public class SubSearch {
                 .addParameter("c", "")
                 .build();
 
-        return uri.toURL().toString();
+        return uri.toURL().toString().replaceFirst("=", "=" + name);
     }
 
     public static List<String> findSubLinks(String name) {
         HashSet<String> set = new HashSet<>();
         try {
             Document doc = Jsoup.connect(getURL(name)).get();
+            System.out.println(doc);
             Elements links = doc.select("a[href*=/subtitles/]");
             for (Element e : links) {
                 if (!e.toString().contains("comments") && !e.toString().contains("trailer")
@@ -61,7 +65,7 @@ public class SubSearch {
                 }
             }
         } catch (Exception e) {
-            return null;
+            new ArrayList<>();
         }
         return set.stream().toList();
     }
@@ -79,14 +83,19 @@ public class SubSearch {
         return cs;
     }
 
-    public static void downloadFile(String url, String path) throws IOException {
+    public static void downloadFile(String url, String path, String name) throws IOException, URISyntaxException {
         HttpGet request = new HttpGet(url);
-        request.addHeader("Referer", "https://subsunacs.net");
+        request.addHeader("Referer", getURL(name));
         CloseableHttpClient client = HttpClients.createDefault();
         try (CloseableHttpResponse response = client.execute(request)) {
+            String n = "untitled.rar";
             HttpEntity entity = response.getEntity();
-            String name = response.getHeader("Content-Disposition").getValue().replaceAll("\"", "").substring(21);
-            File file = new File(path + "/" + name);
+            System.out.println(entity.getContentType());
+            if (response.containsHeader("Content-Disposition")) {
+                n = response.getHeader("Content-Disposition").getValue()
+                        .replaceAll("\"", "").substring(21);
+            }
+            File file = new File(path + "/" + n);
             file.createNewFile();
             if (entity != null) {
                 try (InputStream inputStream = entity.getContent();
@@ -105,4 +114,41 @@ public class SubSearch {
         }
     }
 
+    public static String parseTitle(String filename) {
+        for (int i = 0; i < filename.length() - 4; i++) {
+            int j = i + 4;
+            if (filename.substring(i, j).matches("(19|20)\\d{2}$") && i != 0) {
+                return filename.substring(0, i).replace(".", " ");
+            }
+        }
+
+        String[] arr = {"HDTV", "WEB[-.]?DL", "HDDVD", "DVDRip", "DVD", "B[DR]Rip", "Blu[-.\\ ]?Ray", "HDRip", "WEBRIP"};
+        int j = -1;
+        for (int i = 0; i < filename.length(); i++) {
+            for (String s : arr) {
+                if (i > s.length() && filename.substring(i - s.length(), i).matches(s))
+                    j = i - s.length();
+            }
+        }
+        if (j != -1) filename = filename.substring(0, j);
+        return filename.replace(".", " ");
+    }
+
+    public static String mostAccurateEntry(List<String> list, String name) {
+        int max = -1;
+        for (int i = 0; i < list.size(); i++) {
+            double index = new JaroWinklerDistance().apply(list.get(i), name);
+            if (index > max) max = i;
+        }
+        return list.get(max);
+    }
+
+    public static void main(String[] args) throws MalformedURLException, URISyntaxException {
+        System.out.println(getURL("heavenly creatures"));
+        System.out.println(findSubLinks("heavenly creatures"));
+
+    }
+
+
 }
+

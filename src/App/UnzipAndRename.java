@@ -5,24 +5,23 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 
-public class App {
-    public App() {
-    }
+public class UnzipAndRename {
 
     public static File findZip(File dir) throws NoZipException, IOException {
         if (!dir.isDirectory()) return dir;
         File[] arr = dir.listFiles();
         for (File f : arr) {
             if (f.getName().contains("zip") || f.getName().contains("rar"))
-                if (zipContainsSrt(f.getAbsolutePath())) return f;
+                return f;
         }
-        throw new NoZipException("");
+        throw new NoZipException("No zip/rar file found in path");
     }
 
     public static void unzipFile(File zipped, String pathname) throws IOException {
@@ -33,6 +32,7 @@ public class App {
             if (zipEntry.isDirectory()) continue;
             else {
                 File newFile = new File(pathname + "/" + zipEntry.getName());
+
                 FileOutputStream stream = new FileOutputStream(newFile);
                 int len;
                 while ((len = zis.read(buffer)) > 0) {
@@ -87,41 +87,19 @@ public class App {
         return path.contains("mkv") || path.contains("mp4") || path.contains("avi") || path.contains("wav");
     }
 
-    public static void execute(String dir) throws IOException, NotDirectoryException, NoZipException, URISyntaxException {
-        File location = new File(dir);
-        if (!location.isDirectory()) throw new NotDirectoryException("");
-        String name = location.getName().replaceAll(".", " ");
-        List<String> list = SubSearch.findSubLinks(location.getName());
-        //getting first result
-        //SubSearch.downloadFile();
-        File file = findZip(location);
-        unzipFile(file, dir);
-        renameSrFile(location);
+    public static void apply(String dir) throws IOException, NotDirectoryException, NoZipException, URISyntaxException {
+        File file = new File(dir);
+        File toUnzip = findZip(file);
+        unzipFile(toUnzip, dir);
+        renameSrFile(file);
     }
 
-    public static boolean zipContainsSrt(String path) throws IOException {
-        String str = "";
-        ZipFile zip = null;
-        try {
-            zip = new ZipFile(path);
+    public static void main(String[] args) throws IOException {
+        unzipFile(new File("C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD/" +
+                        "heavenly.creatures.1994.uncut.720p.bluray.x264-avs720(subsunacs.net).rar"),
+                "C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD");
+    }
 
-            for (Enumeration<?> e = zip.entries(); e.hasMoreElements(); ) {
-                ZipEntry entry = (ZipEntry) e.nextElement();
-                if (!entry.isDirectory()) {
-                    str += entry.getName();
-                    //System.out.println(entry.getName());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            assert zip != null;
-            zip.close();
-        }
-        return str.contains("srt");
-    }
-    public static void main(String[] args) {
-    }
 
 }
 
