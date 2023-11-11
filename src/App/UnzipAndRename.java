@@ -94,7 +94,8 @@ public class UnzipAndRename {
         renameSrFile(file);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NoZipException {
+        System.out.println(findZip(new File("C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD")));
         unzipFile(new File("C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD/" +
                         "heavenly.creatures.1994.uncut.720p.bluray.x264-avs720(subsunacs.net).rar"),
                 "C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD");
