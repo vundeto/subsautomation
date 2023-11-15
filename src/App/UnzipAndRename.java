@@ -1,5 +1,7 @@
 package App;
 
+import com.github.junrar.extract.ExtractArchive;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,7 +16,7 @@ import java.util.zip.ZipInputStream;
 
 public class UnzipAndRename {
 
-    public static File findZip(File dir) throws NoZipException, IOException {
+    public static File findZip(File dir) throws NoZipException{
         if (!dir.isDirectory()) return dir;
         File[] arr = dir.listFiles();
         for (File f : arr) {
@@ -23,6 +25,14 @@ public class UnzipAndRename {
         }
         throw new NoZipException("No zip/rar file found in path");
     }
+
+    public static void extract(File rar, String pathname) throws IOException {
+        File temp = new File(pathname);
+        ExtractArchive extractArchive = new ExtractArchive();
+        extractArchive.extractArchive(rar, temp);
+        System.out.println("extracted");
+    }
+
 
     public static void unzipFile(File zipped, String pathname) throws IOException {
         byte[] buffer = new byte[2048];
@@ -44,7 +54,6 @@ public class UnzipAndRename {
         }
         zis.closeEntry();
         zis.close();
-
     }
 
     public static HashMap<String, String> findSrtnVid(File location) {
@@ -52,9 +61,11 @@ public class UnzipAndRename {
         ArrayList<String> srtArr = new ArrayList<>();
         ArrayList<String> vidArr = new ArrayList<>();
         File[] arr = location.listFiles();
-        for (File f : arr) {
-            if (f.getName().contains("srt")) srtArr.add(f.getAbsolutePath());
-            if (isVideoFile(f.getAbsolutePath())) vidArr.add(f.getAbsolutePath());
+        if (arr != null) {
+            for (File f : arr) {
+                if (f.getName().contains("srt")) srtArr.add(f.getAbsolutePath());
+                if (isVideoFile(f.getAbsolutePath())) vidArr.add(f.getAbsolutePath());
+            }
         }
         for (int i = 0; i < vidArr.size(); i++) {
             try {
@@ -90,16 +101,12 @@ public class UnzipAndRename {
     public static void apply(String dir) throws IOException, NotDirectoryException, NoZipException, URISyntaxException {
         File file = new File(dir);
         File toUnzip = findZip(file);
-        unzipFile(toUnzip, dir);
+        extract(toUnzip, dir);
         renameSrFile(file);
     }
 
-    public static void main(String[] args) throws IOException, NoZipException {
-        System.out.println(findZip(new File("C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD")));
-        unzipFile(new File("C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD/" +
-                        "heavenly.creatures.1994.uncut.720p.bluray.x264-avs720(subsunacs.net).rar"),
-                "C:/filmi/Heavenly.Creatures.1994.UNCUT.BRRip.x264.AC3-HUD");
-    }
+
+
 
 
 }

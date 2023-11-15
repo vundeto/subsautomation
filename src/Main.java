@@ -1,3 +1,6 @@
+import gui.FileChooser;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,28 +79,10 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
-        File l = new File("C:/filmi/The.Reader.DVDRip.XviD-DASH/");
-
-        HashMap<String, String> s = findSrtnVid(l);
-        for (String str: s.keySet()){
-            System.out.println(str);
-            System.out.println(s.get(str));
-        }
-        renameSrFile(l);
-        System.out.println(zipContainsSrt("C:/filmi/The.Reader.DVDRip.XviD-DASH/subs.zip"));
-
-
+        SwingUtilities.invokeLater(() -> {
+            final FileChooser wnd = new FileChooser();
+            wnd.setVisible(true);
+        });
     }
-/*
-    String filepath = "C:/Users/konst/IdeaProjects/subtitrie/files/files.zip";
-    String dir = "C:/Users/konst/IdeaProjects/subtitrie/files/";
-    File location = new File(dir);
-    File file = new File(filepath);
-    unzipFile(file, dir);
-        System.out.println("Extracted");
-        Thread.sleep(10000);
-    leaveOnlySrt(location);
-        System.out.println("Executed");
 
- */
 }

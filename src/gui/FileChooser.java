@@ -20,7 +20,7 @@ public class FileChooser extends JFrame implements ActionListener {
     private String title;
 
     public FileChooser() {
-        super("Unzip & Rename");
+        setTitle("Download & Format Subs");
         setSize(400, 200);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         JPanel panel = new JPanel();
@@ -35,7 +35,6 @@ public class FileChooser extends JFrame implements ActionListener {
         panel.add(filePath);
         panel.add(confirmButton);
         add(panel);
-
 
         setVisible(true);
     }
@@ -70,7 +69,7 @@ public class FileChooser extends JFrame implements ActionListener {
             try {
                 SubSearch.downloadFile("https://subsunacs.net" + SubSearch.mostAccurateEntry(l, title), path, title);
                 UnzipAndRename.apply(path);
-                JOptionPane.showMessageDialog(null,"Executed successfully", "Result"
+                JOptionPane.showMessageDialog(null, "Executed successfully", "Result"
                         , JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -92,13 +91,10 @@ public class FileChooser extends JFrame implements ActionListener {
         JTextField field = new JTextField(15);
         field.setEditable(true);
         field.setText(text);
-        confirmButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setTitle(field.getText());
-                System.out.println(field.getText());
-                jd.dispose();
-            }
+        confirmButton.addActionListener(e -> {
+            setTitle(field.getText());
+            System.out.println(field.getText());
+            jd.dispose();
         });
         confirmButton.setEnabled(true);
 
@@ -129,8 +125,6 @@ public class FileChooser extends JFrame implements ActionListener {
     public static void main(String[] args) {
         FileChooser f = new FileChooser();
         f.setVisible(true);
-
     }
-
 }
 

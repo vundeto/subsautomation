@@ -97,14 +97,12 @@ public class SubSearch {
             }
             File file = new File(path + "/" + n);
             file.createNewFile();
-            if (entity != null) {
-                try (InputStream inputStream = entity.getContent();
-                     FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                    int read;
-                    byte[] buffer = new byte[4096];
-                    while ((read = inputStream.read(buffer)) != -1) {
-                        fileOutputStream.write(buffer, 0, read);
-                    }
+            try (InputStream inputStream = entity.getContent();
+                 FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                int read;
+                byte[] buffer = new byte[4096];
+                while ((read = inputStream.read(buffer)) != -1) {
+                    fileOutputStream.write(buffer, 0, read);
                 }
             }
         } catch (Exception e) {
@@ -142,13 +140,5 @@ public class SubSearch {
         }
         return list.get(max);
     }
-
-    public static void main(String[] args) throws MalformedURLException, URISyntaxException {
-        System.out.println(getURL("heavenly creatures"));
-        System.out.println(findSubLinks("heavenly creatures"));
-
-    }
-
-
 }
 
